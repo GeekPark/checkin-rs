@@ -53,8 +53,15 @@ impl DB {
         let conn = self.conn.lock().unwrap();
         let mut sql = conn.prepare(query).unwrap();
         let mut v = Vec::new();
-        sql.query_map(&[], |row| v.push(T::from_row(row))).unwrap();
+        for i in sql.query_map(&[], |row| T::from_row(&row)).unwrap() {
+            v.push(i.unwrap());
+        }
         v
+    }
+
+    pub fn search_one<T: Record>(&self, query: &str) -> Option<T> {
+        let conn = self.conn.lock().unwrap();
+        conn.query_row(query, &[], |row| T::from_row(&row)).ok()
     }
 }
 
