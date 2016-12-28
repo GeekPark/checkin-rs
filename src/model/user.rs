@@ -31,6 +31,18 @@ impl Record for User {
              &self.note,
              &self.checked_at]
     }
+    fn from_row(row: &sql::Row) -> Self {
+        User {
+            id: row.get(0),
+            name: row.get(1),
+            phone: row.get(2),
+            company: row.get(3),
+            position: row.get(4),
+            email: row.get(5),
+            note: row.get(6),
+            checked_at: row.get(7),
+        }
+    }
 }
 
 impl User {
@@ -60,4 +72,6 @@ impl User {
             checked_at: None,
         }
     }
+
+    fn upsert(&self, db: &DB) {}
 }

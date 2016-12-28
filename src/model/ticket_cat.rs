@@ -17,6 +17,13 @@ impl Record for TicketCat {
     fn values<'a>(&'a self) -> Vec<&'a ToSql> {
         vec![&self.id, &self.name, &self.days]
     }
+    fn from_row(row: &sql::Row) -> Self {
+        TicketCat {
+            id: row.get(0),
+            name: row.get(1),
+            days: row.get(2),
+        }
+    }
 }
 
 impl TicketCat {

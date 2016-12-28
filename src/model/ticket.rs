@@ -35,6 +35,7 @@ impl Ticket {
         let mut count = 0;
         for record in rdr.decode() {
             let r: CSVRecord = record.unwrap();
+
             count += 1;
         }
         Some(count)
@@ -65,5 +66,14 @@ impl Record for Ticket {
     }
     fn values<'a>(&'a self) -> Vec<&'a ToSql> {
         vec![&self.id, &self.ticket_cat_id, &self.user_id, &self.qrcode, &self.price]
+    }
+    fn from_row(row: &sql::Row) -> Self {
+        Ticket {
+            id: row.get(0),
+            ticket_cat_id: row.get(1),
+            user_id: row.get(2),
+            qrcode: row.get(3),
+            price: row.get(4),
+        }
     }
 }
