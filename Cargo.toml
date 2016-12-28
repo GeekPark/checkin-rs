@@ -1,0 +1,18 @@
+[package]
+name = "gpk_checkin"
+version = "0.1.0"
+authors = ["Shou Ya <github@lain.li>"]
+
+[dependencies]
+iron = "*"
+rusqlite = "*"
+rocket = "0.1.2"
+rocket_codegen = "0.1.2"
+rocket_contrib = "0.1.2"
+serde = "*"
+csv = "*"
+rustc-serialize = "*"
+lazy_static = "*"
+uuid = { version = "*", features = ["v4"] }
+time = "*"
+docopt = "*"

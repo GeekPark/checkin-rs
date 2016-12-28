@@ -1,0 +1,5 @@
+Geekpark Checkin for GIF 2017
+
+Usage:
+    gpk_checkin init
+    gpk_checkin server
