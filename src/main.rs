@@ -1,6 +1,7 @@
 #![feature(plugin)]
 #![feature(conservative_impl_trait)]
 #![feature(custom_attribute)]
+#![feature(proc_macro)]
 #![plugin(rocket_codegen)]
 
 #[macro_use]
@@ -8,6 +9,8 @@ extern crate rocket;
 #[macro_use]
 extern crate rocket_contrib;
 extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 extern crate csv;
 #[macro_use]
 extern crate lazy_static;

@@ -69,4 +69,12 @@ impl TicketCat {
         let id = Uuid::parse_str(id).unwrap().hyphenated().to_string();
         db.search_one("SELECT * FROM ticket_cats WHERE id = ?", &[&id])
     }
+
+    pub fn guard_valid_day(&self) -> Option<()> {
+        if today::contains_today(&self.days) {
+            Some(())
+        } else {
+            None
+        }
+    }
 }

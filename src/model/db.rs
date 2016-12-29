@@ -66,6 +66,21 @@ impl DB {
         let conn = self.conn.lock().unwrap();
         conn.query_row(query, args, |row| T::from_row(&row)).ok()
     }
+    pub fn update(&self,
+                  table: &str,
+                  query: &str,
+                  query_params: &[&ToSql],
+                  set: &str,
+                  set_params: &[&ToSql]) {
+        let conn = self.conn.lock().unwrap();
+        let sql = format!("UPDATE {} SET {} WHERE {};", table, set, query);
+        let mut stmt = conn.prepare(&sql).unwrap();
+        let mut params = Vec::new();
+        for param in set_params.iter().chain(query_params.iter()) {
+            params.push(*param)
+        }
+        stmt.execute(params.as_slice());
+    }
 }
 
 pub trait Record {

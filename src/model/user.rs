@@ -76,4 +76,34 @@ impl User {
     pub fn find_by_phone(db: &DB, phone: &str) -> Option<Self> {
         db.search_one("SELECT * FROM users WHERE phone = ?", &[&phone])
     }
+    pub fn find_by_id(db: &DB, id: &str) -> Option<Self> {
+        db.search_one("SELECT * FROM users WHERE id = ?", &[&id])
+    }
+
+    fn already_checked_in(&self) -> bool {
+        self.checked_at.is_some()
+    }
+    fn update_column(&self, db: &DB, field: &str, val: &ToSql) {
+        db.update("users",
+                  "id = ?",
+                  &[&self.id],
+                  &format!("{} = ?", field),
+                  &[val])
+    }
+    pub fn check_in(&mut self, db: &DB) -> Option<()> {
+        if self.already_checked_in() {
+            None
+        } else {
+            use time::get_time;
+            self.update_column(db, "checked_at", &get_time());
+            self.reload(db)
+        }
+    }
+
+    fn reload(&mut self, db: &DB) -> Option<()> {
+        Self::find_by_id(db, &self.id).map(|user| {
+            *self = user;
+            ()
+        })
+    }
 }
