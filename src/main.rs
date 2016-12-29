@@ -3,6 +3,9 @@
 #![feature(custom_attribute)]
 #![feature(proc_macro)]
 #![plugin(rocket_codegen)]
+// For [rustfmt_skip]
+#![allow(unused_attributes)]
+
 
 #[macro_use]
 extern crate rocket;

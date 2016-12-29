@@ -1,5 +1,6 @@
 use model::*;
 
+#[derive(Serialize)]
 pub struct TicketCat {
     pub id: String,
     pub name: String,
@@ -70,8 +71,8 @@ impl TicketCat {
         db.search_one("SELECT * FROM ticket_cats WHERE id = ?", &[&id])
     }
 
-    pub fn guard_valid_day(&self) -> Option<()> {
-        if today::contains_today(&self.days) {
+    pub fn guard_today(vec: &Vec<Self>) -> Option<()> {
+        if vec.iter().any(|tc| today::contains_today(&tc.days)) {
             Some(())
         } else {
             None

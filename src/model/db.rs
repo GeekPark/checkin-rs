@@ -66,6 +66,7 @@ impl DB {
         let conn = self.conn.lock().unwrap();
         conn.query_row(query, args, |row| T::from_row(&row)).ok()
     }
+
     pub fn update(&self,
                   table: &str,
                   query: &str,

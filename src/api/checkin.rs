@@ -6,8 +6,6 @@ use serde::ser::{Serialize, Serializer};
 
 use model::*;
 
-type Message = String;
-
 #[derive(Serialize)]
 struct TicketInfo {
     name: String,
@@ -15,7 +13,7 @@ struct TicketInfo {
     company: String,
     position: String,
     email: String,
-    ticket_cat: String,
+    ticket_cats: Vec<TicketCat>,
     price: f64,
     checked_at: String,
 }
@@ -46,7 +44,7 @@ impl Serialize for CheckinResult {
 }
 
 impl TicketInfo {
-    fn from(ticket: &Ticket, user: &User, tc: &TicketCat) -> Self {
+    fn from(ticket: &Ticket, user: &User, tcs: Vec<TicketCat>) -> Self {
         use time;
         let checked_at = user.checked_at
             .map(time::at)
@@ -58,7 +56,7 @@ impl TicketInfo {
             company: user.company.clone(),
             position: user.position.clone(),
             email: user.email.clone(),
-            ticket_cat: tc.name.clone(),
+            ticket_cats: tcs,
             price: ticket.price,
             checked_at: checked_at,
         }
@@ -81,10 +79,11 @@ fn checkin_code(code: &str, db: DBI) -> JSON<CheckinResult> {
     let db = &db.0;
     let ticket = try_err!(Ticket::find_by_qrcode(db, code), "找不到指定票号");
     let mut user = try_err!(ticket.user(db), "该票无关联用戶");
-    let tc = try_err!(ticket.ticket_cat(db), "找不關聯");
-    try_err!(tc.guard_valid_day(), "该票不可用于今天的大会");
     try_err!(user.check_in(db), "不可以重复签到");
-    let ticket_info = TicketInfo::from(&ticket, &user, &tc);
+    let tcs = user.ticket_cats(db);
+    try_err!(TicketCat::guard_today(&tcs),
+             "用户未购可以进今日会场的票");
+    let ticket_info = TicketInfo::from(&ticket, &user, tcs);
     JSON(CheckinResult(Ok(ticket_info)))
 }
 

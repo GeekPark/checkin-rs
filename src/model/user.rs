@@ -46,6 +46,7 @@ impl Record for User {
 }
 
 impl User {
+    #[rustfmt_skip]
     pub fn create_table(db: &DB) {
         db.create_table("users",
                         "id              VARCHAR PRIMARY KEY,
@@ -55,7 +56,8 @@ impl User {
                          position        VARCHAR,
                          email           VARCHAR NOT NULL,
                          note            VARCHAR,
-                         checked_at      INTEGER");
+                         checked_at      INTEGER")
+          .unwrap();
     }
 
     #[rustfmt_skip]
@@ -105,5 +107,17 @@ impl User {
             *self = user;
             ()
         })
+    }
+    pub fn tickets(&self, db: &DB) -> Vec<Ticket> {
+        db.search("SELECT * FROM users WHERE user_id = ?", &[&self.id])
+    }
+    #[rustfmt_skip]
+    pub fn ticket_cats(&self, db: &DB) -> Vec<TicketCat> {
+        db.search("SELECT tc.* \
+                   FROM ticket_cats AS tc \
+                   INNER JOIN tickets AS t ON t.ticket_cat_id = tc.id \
+                   INNER JOIN users AS u ON t.user_id = u.id \
+                   WHERE u.id = ?",
+                  &[&self.id])
     }
 }

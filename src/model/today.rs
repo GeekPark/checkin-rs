@@ -3,11 +3,11 @@ use std::sync::RwLock;
 pub type Day = String;
 
 lazy_static! {
-    static ref _GLOBAL_TODAY: RwLock<Day> = RwLock::new(String::from("1"));
+    static ref _GLOBAL_TODAY: RwLock<Day> = RwLock::new(day_for("1"));
 }
 
-pub fn day_for(day: String) -> Day {
-    day
+pub fn day_for(day: &str) -> Day {
+    day.into()
 }
 
 pub fn get_today() -> Day {
