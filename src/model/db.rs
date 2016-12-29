@@ -31,7 +31,10 @@ impl DB {
                           values = sql_values);
         match self.conn.lock().unwrap().execute(&sql, &values) {
             Ok(_) => true,
-            Err(_) => false,
+            Err(e) => {
+                println!("error! {:?}", e);
+                false
+            }
         }
     }
 
@@ -49,19 +52,19 @@ impl DB {
         self.conn.lock().unwrap().execute_batch(&sql)
     }
 
-    pub fn search<T: Record>(&self, query: &str) -> Vec<T> {
+    pub fn search<T: Record>(&self, query: &str, args: &[&ToSql]) -> Vec<T> {
         let conn = self.conn.lock().unwrap();
         let mut sql = conn.prepare(query).unwrap();
         let mut v = Vec::new();
-        for i in sql.query_map(&[], |row| T::from_row(&row)).unwrap() {
+        for i in sql.query_map(args, |row| T::from_row(&row)).unwrap() {
             v.push(i.unwrap());
         }
         v
     }
 
-    pub fn search_one<T: Record>(&self, query: &str) -> Option<T> {
+    pub fn search_one<T: Record>(&self, query: &str, args: &[&ToSql]) -> Option<T> {
         let conn = self.conn.lock().unwrap();
-        conn.query_row(query, &[], |row| T::from_row(&row)).ok()
+        conn.query_row(query, args, |row| T::from_row(&row)).ok()
     }
 }
 
@@ -84,7 +87,7 @@ lazy_static! {
 
 use rocket::request::{FromRequest, Request};
 use rocket::request;
-pub struct DBI(Arc<DB>);
+pub struct DBI(pub Arc<DB>);
 
 impl<'a, 'r> FromRequest<'a, 'r> for DBI {
     type Error = sql::Error;

@@ -1,9 +1,9 @@
 use model::*;
 
 pub struct TicketCat {
-    id: String,
-    name: String,
-    days: String,
+    pub id: String,
+    pub name: String,
+    pub days: String,
 }
 
 impl Record for TicketCat {
@@ -55,5 +55,18 @@ impl TicketCat {
         for rec in v.iter() {
             db.insert(rec);
         }
+    }
+
+    pub fn media_ticket(db: &DB) -> Self {
+        Self::find_by_name(db, "媒体票").unwrap()
+    }
+
+    pub fn find_by_name(db: &DB, name: &str) -> Option<Self> {
+        db.search_one("SELECT * FROM ticket_cats WHERE name = ?", &[&name])
+    }
+
+    pub fn find_by_id(db: &DB, id: &str) -> Option<Self> {
+        let id = Uuid::parse_str(id).unwrap().hyphenated().to_string();
+        db.search_one("SELECT * FROM ticket_cats WHERE id = ?", &[&id])
     }
 }

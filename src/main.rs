@@ -3,7 +3,9 @@
 #![feature(custom_attribute)]
 #![plugin(rocket_codegen)]
 
+#[macro_use]
 extern crate rocket;
+#[macro_use]
 extern crate rocket_contrib;
 extern crate serde;
 extern crate csv;
@@ -32,8 +34,7 @@ fn init() {
 }
 
 fn server() {
-    rocket::ignite().mount("/api", api::routes()).launch();
-    rocket::ignite().mount("/admin", admin::routes()).launch();
+    rocket::ignite().mount("/api", api::routes()).mount("/admin", admin::routes()).launch();
 }
 
 fn main() {

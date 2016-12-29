@@ -1,14 +1,14 @@
 use model::*;
 
 pub struct User {
-    id: String,
-    name: String,
-    phone: String,
-    company: String,
-    position: String,
-    email: String,
-    note: String,
-    checked_at: Option<Timespec>,
+    pub id: String,
+    pub name: String,
+    pub phone: String,
+    pub company: String,
+    pub position: String,
+    pub email: String,
+    pub note: String,
+    pub checked_at: Option<Timespec>,
 }
 
 
@@ -59,8 +59,8 @@ impl User {
     }
 
     #[rustfmt_skip]
-    fn new(name: &str, phone: &str, company: &str,
-           position: &str, email: &str, note: &str) -> Self {
+    pub fn new(name: &str, phone: &str, company: &str,
+               position: &str, email: &str, note: &str) -> Self {
         User {
             id: Uuid::new_v4().hyphenated().to_string(),
             name: name.into(),
@@ -73,5 +73,7 @@ impl User {
         }
     }
 
-    fn upsert(&self, db: &DB) {}
+    pub fn find_by_phone(db: &DB, phone: &str) -> Option<Self> {
+        db.search_one("SELECT * FROM users WHERE phone = ?", &[&phone])
+    }
 }

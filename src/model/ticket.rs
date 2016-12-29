@@ -1,50 +1,19 @@
-use std::io::Read;
-
-use csv;
-
 use model::*;
 
+#[derive(Debug)]
 pub struct Ticket {
-    id: String,
-    ticket_cat_id: String,
-    user_id: String,
-    qrcode: String,
-    price: f64,
-}
-
-#[derive(RustcDecodable)]
-struct CSVRecord {
-    name: String,
-    phone: String,
-    company: String,
-    position: String,
-    email: String,
-    qrcode: String,
-    ticket_cat: String,
-    price: Option<f32>,
-    ticket_cat_id: Option<String>,
-    note: Option<String>,
-    status: String,
+    pub id: String,
+    pub ticket_cat_id: String,
+    pub user_id: String,
+    pub qrcode: String,
+    pub price: f64,
 }
 
 impl Ticket {
-    pub fn import_from_csv<T>(csv: T) -> Option<usize>
-        where T: Read
-    {
-        let mut rdr = csv::Reader::from_reader(csv);
-        let mut count = 0;
-        for record in rdr.decode() {
-            let r: CSVRecord = record.unwrap();
-
-            count += 1;
-        }
-        Some(count)
-    }
-
     #[rustfmt_skip]
     pub fn create_table(db: &DB) -> () {
         db.create_table("tickets",
-                        "id             INTEGER PRIMARY KEY, \
+                        "id             VARCHAR PRIMARY KEY, \
                         ticket_cat_id   VARCHAR NOT NULL, \
                         user_id         VARCHAR NOT NULL, \
                         qrcode          VARCHAR NOT NULL, \
@@ -74,6 +43,18 @@ impl Record for Ticket {
             user_id: row.get(2),
             qrcode: row.get(3),
             price: row.get(4),
+        }
+    }
+}
+
+impl Ticket {
+    pub fn new(tc_id: &str, uid: &str, qrcode: &str, price: f64) -> Self {
+        Ticket {
+            id: Uuid::new_v4().hyphenated().to_string(),
+            ticket_cat_id: tc_id.into(),
+            user_id: uid.into(),
+            qrcode: qrcode.into(),
+            price: price,
         }
     }
 }
