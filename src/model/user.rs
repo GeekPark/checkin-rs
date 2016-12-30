@@ -93,12 +93,14 @@ impl User {
                   &[val])
     }
     pub fn check_in(&mut self, db: &DB) -> Option<()> {
+        self.reload(db);
         if self.already_checked_in() {
             None
         } else {
             use time::get_time;
             self.update_column(db, "checked_at", &get_time());
-            self.reload(db)
+            self.reload(db);
+            Some(())
         }
     }
 
@@ -119,5 +121,19 @@ impl User {
                    INNER JOIN users AS u ON t.user_id = u.id \
                    WHERE u.id = ?",
                   &[&self.id])
+    }
+
+    pub fn search_all_fields(db: &DB, keyword: &str) -> Vec<User> {
+        let k: &ToSql = &format!("%{}%", keyword);
+        let params = &[k, k, k, k, k, k];
+        db.search("SELECT u.* \
+                   FROM users AS u \
+                   WHERE u.name     LIKE ? \
+                   OR    u.phone    LIKE ? \
+                   OR    u.company  LIKE ? \
+                   OR    u.position LIKE ? \
+                   OR    u.email    LIKE ? \
+                   OR    u.note     LIKE ?",
+                  params)
     }
 }
