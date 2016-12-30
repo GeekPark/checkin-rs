@@ -17,10 +17,10 @@ impl Ticket {
                         ticket_cat_id   VARCHAR NOT NULL, \
                         user_id         VARCHAR NOT NULL, \
                         qrcode          VARCHAR NOT NULL, \
-                        price           REAL");
-        db.create_index("tickets", "ticket_cat_id");
-        db.create_index("tickets", "user_id");
-        db.create_index("tickets", "qrcode");
+                        price           REAL").unwrap();
+        db.create_index("tickets", "ticket_cat_id").unwrap();
+        db.create_index("tickets", "user_id").unwrap();
+        db.create_index("tickets", "qrcode").unwrap();
     }
 }
 

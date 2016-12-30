@@ -111,7 +111,7 @@ impl User {
         })
     }
     pub fn tickets(&self, db: &DB) -> Vec<Ticket> {
-        db.search("SELECT * FROM users WHERE user_id = ?", &[&self.id])
+        db.search("SELECT * FROM tickets WHERE user_id = ?", &[&self.id])
     }
     #[rustfmt_skip]
     pub fn ticket_cats(&self, db: &DB) -> Vec<TicketCat> {
@@ -124,7 +124,9 @@ impl User {
     }
 
     pub fn search_all_fields(db: &DB, keyword: &str) -> Vec<User> {
-        let k: &ToSql = &format!("%{}%", keyword);
+        use rocket::http::uri::URI;
+        let keyword_decoded = URI::percent_decode_lossy(keyword.as_bytes());
+        let k: &ToSql = &format!("%{}%", keyword_decoded);
         let params = &[k, k, k, k, k, k];
         db.search("SELECT u.* \
                    FROM users AS u \
@@ -133,7 +135,17 @@ impl User {
                    OR    u.company  LIKE ? \
                    OR    u.position LIKE ? \
                    OR    u.email    LIKE ? \
-                   OR    u.note     LIKE ?",
+                   OR    u.note     LIKE ? \
+                   LIMIT 20",
                   params)
+    }
+
+    pub fn uncheck(&self, db: &DB) -> Option<i32> {
+        if self.already_checked_in() {
+            self.update_column(db, "checked_at", &None::<Option<i32>>);
+            Some(0)
+        } else {
+            None
+        }
     }
 }

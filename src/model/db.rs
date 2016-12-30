@@ -80,7 +80,7 @@ impl DB {
         for param in set_params.iter().chain(query_params.iter()) {
             params.push(*param)
         }
-        stmt.execute(params.as_slice());
+        stmt.execute(params.as_slice()).unwrap();
     }
 }
 

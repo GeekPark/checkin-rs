@@ -17,9 +17,11 @@ struct TicketInfo {
     total_price: f64,
     checked_at: String,
 }
-struct CheckinResult(Result<TicketInfo, String>);
+struct CheckinResult<T>(Result<T, String>);
 
-impl Serialize for CheckinResult {
+impl<T> Serialize for CheckinResult<T>
+    where T: Serialize
+{
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
         where S: Serializer
     {
@@ -77,7 +79,7 @@ macro_rules! try_err {
 }
 
 
-fn result_from_user(mut user: User, db: &DB) -> JSON<CheckinResult> {
+fn result_from_user(mut user: User, db: &DB) -> JSON<CheckinResult<TicketInfo>> {
     let ts = user.tickets(db);
     let tcs = user.ticket_cats(db);
     try_err!(user.check_in(db), "不可以重复签到");
@@ -88,7 +90,7 @@ fn result_from_user(mut user: User, db: &DB) -> JSON<CheckinResult> {
 }
 
 #[get("/checkin/code/<code>")]
-fn checkin_code(code: &str, db: DBI) -> JSON<CheckinResult> {
+fn checkin_code(code: &str, db: DBI) -> JSON<CheckinResult<TicketInfo>> {
     let db = &db.0;
     let ticket = try_err!(Ticket::find_by_qrcode(db, code), "找不到指定票号");
     let user = try_err!(ticket.user(db), "该票无关联用戶");
@@ -96,12 +98,27 @@ fn checkin_code(code: &str, db: DBI) -> JSON<CheckinResult> {
 }
 
 #[get("/checkin/user_id/<user_id>")]
-fn checkin_user_id(user_id: &str, db: DBI) -> JSON<CheckinResult> {
+fn checkin_user_id(user_id: &str, db: DBI) -> JSON<CheckinResult<TicketInfo>> {
     let db = &db.0;
     let user = try_err!(User::find_by_id(db, user_id), "该用户不存在");
     result_from_user(user, db)
 }
 
+#[get("/uncheck/code/<code>")]
+fn uncheck_code(code: &str, db: DBI) -> JSON<CheckinResult<i32>> {
+    let db = &db.0;
+    let ticket = try_err!(Ticket::find_by_qrcode(db, code), "找不到指定票号");
+    let user = try_err!(ticket.user(db), "该票无关联用戶");
+    JSON(CheckinResult(Ok(try_err!(user.uncheck(db), "用户尚未签到"))))
+}
+
+#[get("/uncheck/user_id/<user_id>")]
+fn uncheck_user_id(user_id: &str, db: DBI) -> JSON<CheckinResult<i32>> {
+    let db = &db.0;
+    let user = try_err!(User::find_by_id(db, user_id), "该用户不存在");
+    JSON(CheckinResult(Ok(try_err!(user.uncheck(db), "用户尚未签到"))))
+}
+
 pub fn routes() -> Vec<Route> {
-    routes![checkin_code, checkin_user_id]
+    routes![checkin_code, checkin_user_id, uncheck_code, uncheck_user_id]
 }

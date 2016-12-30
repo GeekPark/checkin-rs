@@ -35,9 +35,13 @@ impl TicketCat {
             days: days.into(),
         }
     }
+    #[rustfmt_skip]
     pub fn create_table(db: &DB) {
         db.create_table("ticket_cats",
-                        "id VARCHAR PRIMARY KEY, name VARCHAR NOT NULL, days VARCHAR NOT NULL");
+                        "id VARCHAR PRIMARY KEY, \
+                         name VARCHAR NOT NULL, \
+                         days VARCHAR NOT NULL")
+          .unwrap()
     }
 
     #[rustfmt_skip]
