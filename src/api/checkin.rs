@@ -7,16 +7,24 @@ use serde::ser::{Serialize, Serializer};
 use model::*;
 
 #[derive(Serialize)]
-struct TicketInfo {
+struct UserInfo {
     name: String,
     phone: String,
     company: String,
     position: String,
     email: String,
-    ticket_cats: Vec<TicketCat>,
-    total_price: f64,
+    tickets: Vec<TicketInfo>,
     checked_at: String,
 }
+
+#[derive(Serialize)]
+struct TicketInfo {
+    name: String,
+    days: String,
+    price: f64,
+    free: bool,
+}
+
 struct CheckinResult<T>(Result<T, String>);
 
 impl<T> Serialize for CheckinResult<T>
@@ -45,24 +53,34 @@ impl<T> Serialize for CheckinResult<T>
     }
 }
 
-impl TicketInfo {
+impl UserInfo {
     fn from(user: &User, ts: Vec<Ticket>, tcs: Vec<TicketCat>) -> Self {
         use time;
-        use std::ops::Add;
         let checked_at = user.checked_at
             .map(time::at)
             .map(|tm| time::strftime("%Y-%m-%d %H:%M:%S", &tm).unwrap())
             .unwrap_or("".into());
-        let total_price = ts.iter().map(|x| x.price).fold(0f64, f64::add);
-        TicketInfo {
+        let tis: Vec<TicketInfo> = ts.into_iter().zip(tcs).map(TicketInfo::from).collect();
+        UserInfo {
             name: user.name.clone(),
             phone: user.phone.clone(),
             company: user.company.clone(),
             position: user.position.clone(),
             email: user.email.clone(),
-            ticket_cats: tcs,
-            total_price: total_price,
+            tickets: tis,
             checked_at: checked_at,
+        }
+    }
+}
+
+impl TicketInfo {
+    fn from(ttc: (Ticket, TicketCat)) -> Self {
+        let (ref t, ref tc) = ttc;
+        TicketInfo {
+            name: tc.name.clone(),
+            days: tc.days.clone(),
+            price: t.price,
+            free: t.price < 11f64,
         }
     }
 }
@@ -79,18 +97,18 @@ macro_rules! try_err {
 }
 
 
-fn result_from_user(mut user: User, db: &DB) -> JSON<CheckinResult<TicketInfo>> {
+fn result_from_user(mut user: User, db: &DB) -> JSON<CheckinResult<UserInfo>> {
     let ts = user.tickets(db);
     let tcs = user.ticket_cats(db);
     try_err!(user.check_in(db), "不可以重复签到");
     try_err!(TicketCat::guard_today(&tcs),
              "用户未购可以进今日会场的票");
-    let ticket_info = TicketInfo::from(&user, ts, tcs);
-    JSON(CheckinResult(Ok(ticket_info)))
+    let user_info = UserInfo::from(&user, ts, tcs);
+    JSON(CheckinResult(Ok(user_info)))
 }
 
 #[get("/checkin/code/<code>")]
-fn checkin_code(code: &str, db: DBI) -> JSON<CheckinResult<TicketInfo>> {
+fn checkin_code(code: &str, db: DBI) -> JSON<CheckinResult<UserInfo>> {
     let db = &db.0;
     let ticket = try_err!(Ticket::find_by_qrcode(db, code), "找不到指定票号");
     let user = try_err!(ticket.user(db), "该票无关联用戶");
@@ -98,7 +116,7 @@ fn checkin_code(code: &str, db: DBI) -> JSON<CheckinResult<TicketInfo>> {
 }
 
 #[get("/checkin/user_id/<user_id>")]
-fn checkin_user_id(user_id: &str, db: DBI) -> JSON<CheckinResult<TicketInfo>> {
+fn checkin_user_id(user_id: &str, db: DBI) -> JSON<CheckinResult<UserInfo>> {
     let db = &db.0;
     let user = try_err!(User::find_by_id(db, user_id), "该用户不存在");
     result_from_user(user, db)
