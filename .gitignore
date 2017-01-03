@@ -3,3 +3,4 @@ Cargo.lock
 save.db
 *.tar.gz
 pack.sh
+operation_log.sql

@@ -11,9 +11,23 @@ pub struct DB {
     pub conn: Arc<Mutex<sql::Connection>>,
 }
 
+use std;
 impl DB {
+    pub fn trace(sql: &str) {
+        println!("SQL: {}", sql);
+        let sql = sql.to_owned();
+        std::thread::spawn(move || {
+            use std::fs::OpenOptions;
+            use std::io::prelude::*;
+
+            let mut f =
+                OpenOptions::new().create(true).append(true).open("operation_log.sql").unwrap();
+            writeln!(f, "{}", sql).ok();
+        });
+    }
     pub fn connect() -> Self {
-        let conn = sql::Connection::open("save.db").unwrap();
+        let mut conn = sql::Connection::open("save.db").unwrap();
+        conn.trace(Some(Self::trace));
         DB { conn: Arc::new(Mutex::new(conn)) }
     }
 
