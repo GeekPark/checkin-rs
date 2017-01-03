@@ -1,6 +1,6 @@
 use model::*;
 
-#[derive(Debug)]
+#[derive(Serialize, Debug)]
 pub struct Ticket {
     pub id: String,
     pub ticket_cat_id: String,
