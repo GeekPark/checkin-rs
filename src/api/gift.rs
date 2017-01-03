@@ -3,6 +3,7 @@ use rocket_contrib::JSON;
 use serde::ser::{Serialize, Serializer};
 
 use model::*;
+use utils;
 
 struct CheckoutResult<T>(Result<T, String>);
 
@@ -57,7 +58,7 @@ fn list_gifts(uid: &str, db: DBI) -> JSON<CheckoutResult<Vec<String>>> {
 fn checkout_gift(uid: &str, gift: &str, db: DBI) -> JSON<CheckoutResult<i32>> {
     let db = &db.0;
     try_err!(User::find_by_id(db, uid), "该用户不存在");
-    try_err!(Gift::checkout_for(db, uid, gift),
+    try_err!(Gift::checkout_for(db, uid, &utils::url_decode(gift)),
              "用户已领取该礼物");
     JSON(CheckoutResult(Ok(0)))
 }

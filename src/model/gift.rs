@@ -35,9 +35,9 @@ impl Record for Gift {
     fn from_row(row: &sql::Row) -> Self {
         Gift {
             id: row.get(0),
-            user_id: row.get(2),
-            gift: row.get(3),
-            checked_at: row.get(4),
+            user_id: row.get(1),
+            gift: row.get(2),
+            checked_at: row.get(3),
         }
     }
 }
