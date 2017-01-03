@@ -29,13 +29,17 @@ mod api;
 mod admin;
 mod model;
 mod cli;
+mod utils;
 
 fn init() {
     use model::*;
     let db = DB::connect();
+
     User::create_table(&db);
     Ticket::create_table(&db);
     TicketCat::create_table(&db);
+    Gift::create_table(&db);
+
     TicketCat::seed(&db);
 }
 

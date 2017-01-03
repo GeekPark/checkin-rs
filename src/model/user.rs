@@ -124,9 +124,7 @@ impl User {
     }
 
     pub fn search_all_fields(db: &DB, keyword: &str) -> Vec<User> {
-        use rocket::http::uri::URI;
-        let keyword_decoded = URI::percent_decode_lossy(keyword.as_bytes());
-        let k: &ToSql = &format!("%{}%", keyword_decoded);
+        let k: &ToSql = &format!("%{}%", keyword);
         let params = &[k, k, k, k, k, k];
         db.search("SELECT u.* \
                    FROM users AS u \

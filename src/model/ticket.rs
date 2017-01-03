@@ -63,7 +63,7 @@ impl Ticket {
     pub fn user(&self, db: &DB) -> Option<User> {
         User::find_by_id(db, &self.user_id)
     }
-    pub fn ticket_cat(&self, db: &DB) -> Option<TicketCat> {
-        TicketCat::find_by_id(db, &self.ticket_cat_id)
-    }
+    // pub fn ticket_cat(&self, db: &DB) -> Option<TicketCat> {
+    //     TicketCat::find_by_id(db, &self.ticket_cat_id)
+    // }
 }

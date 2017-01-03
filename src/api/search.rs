@@ -2,6 +2,7 @@ use rocket::Route;
 use rocket_contrib::JSON;
 
 use model::*;
+use utils;
 
 #[derive(Serialize)]
 struct UserResult {
@@ -41,7 +42,8 @@ fn convert_user(u: User) -> UserResult {
 #[get("/search/<keyword>")]
 fn search(db: DBI, keyword: &str) -> JSON<SearchResult> {
     let db = &db.0;
-    let results = User::search_all_fields(db, keyword);
+    let keyword = utils::url_decode(keyword);
+    let results = User::search_all_fields(db, &keyword);
     JSON(SearchResult {
         ok: true,
         results: results.into_iter().map(convert_user).collect(),

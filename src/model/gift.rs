@@ -5,7 +5,7 @@ pub struct Gift {
     pub id: String,
     pub user_id: String,
     pub gift: String,
-    pub received_at: Option<Timespec>,
+    pub checked_at: Option<Timespec>,
 }
 
 impl Gift {
@@ -15,7 +15,7 @@ impl Gift {
                         "id             VARCHAR PRIMARY KEY, \
                         user_id         VARCHAR NOT NULL, \
                         gift            VARCHAR NOT NULL, \
-                        received_at     INTEGER").unwrap();
+                        checked_at     INTEGER").unwrap();
         db.create_index("gifts", "user_id").unwrap();
         db.create_index("gifts", "gift").unwrap();
     }
@@ -26,34 +26,34 @@ impl Record for Gift {
         "gifts"
     }
     fn static_fields() -> &'static [&'static str] {
-        static FIELDS: &'static [&'static str] = &["id", "user_id", "gift", "received_at"];
+        static FIELDS: &'static [&'static str] = &["id", "user_id", "gift", "checked_at"];
         FIELDS
     }
     fn values<'a>(&'a self) -> Vec<&'a ToSql> {
-        vec![&self.id, &self.user_id, &self.gift, &self.received_at]
+        vec![&self.id, &self.user_id, &self.gift, &self.checked_at]
     }
     fn from_row(row: &sql::Row) -> Self {
         Gift {
             id: row.get(0),
             user_id: row.get(2),
             gift: row.get(3),
-            received_at: row.get(4),
+            checked_at: row.get(4),
         }
     }
 }
 
 impl Gift {
-    pub fn new(uid: &str, gift: &str) -> Self {
+    fn new(uid: &str, gift: &str) -> Self {
         Gift {
             id: Uuid::new_v4().hyphenated().to_string(),
             user_id: uid.into(),
             gift: gift.into(),
-            received_at: None,
+            checked_at: None,
         }
     }
 
-    pub fn already_checked_out(&self) -> bool {
-        self.received_at.is_some()
+    fn already_checked_out(&self) -> bool {
+        self.checked_at.is_some()
     }
     fn update_column(&mut self, db: &DB, field: &str, val: &ToSql) {
         db.update("gifts",
@@ -68,6 +68,16 @@ impl Gift {
         } else {
             use time::get_time;
             self.update_column(db, "checked_at", &get_time());
+            self.checked_at = Some(get_time());
+            Some(())
+        }
+    }
+    pub fn uncheck(&mut self, db: &DB) -> Option<()> {
+        if !self.already_checked_out() {
+            None
+        } else {
+            self.update_column(db, "checked_at", &None::<Option<i32>>);
+            self.checked_at = None;
             Some(())
         }
     }
@@ -83,7 +93,7 @@ impl Gift {
                       &[&uid, &gift])
     }
 
-    pub fn check_out_for(db: &DB, uid: &str, gift: &str) -> Option<()> {
+    pub fn checkout_for(db: &DB, uid: &str, gift: &str) -> Option<()> {
         let record = Self::find_for_user_and_gift(db, uid, gift);
         let mut gift = record.unwrap_or_else(|| {
             let gift = Self::new(uid, gift);
@@ -91,6 +101,16 @@ impl Gift {
             gift
         });
         gift.check_out(db)
+    }
+
+    pub fn uncheck_for(db: &DB, uid: &str, gift: &str) -> Option<()> {
+        let record = Self::find_for_user_and_gift(db, uid, gift);
+        let mut gift = record.unwrap_or_else(|| {
+            let gift = Self::new(uid, gift);
+            db.insert(&gift);
+            gift
+        });
+        gift.uncheck(db)
     }
 
     // pub fn user(&self, db: &DB) -> Option<User> {
