@@ -46,14 +46,21 @@ macro_rules! try_err {
 }
 
 
-#[get("/gift/list/<uid>")]
-fn list_gifts(uid: &str, db: DBI) -> JSON<CheckoutResult<Vec<String>>> {
+#[get("/gift/for/<uid>/checked")]
+fn list_gifts_checked(uid: &str, db: DBI) -> JSON<CheckoutResult<Vec<String>>> {
     let db = &db.0;
     try_err!(User::find_by_id(db, uid), "该用户不存在");
-    let gifts = Gift::for_user(db, uid);
+    let gifts = Gift::checked_for_user(db, uid);
     JSON(CheckoutResult(Ok(gifts)))
 }
 
+#[get("/gift/for/<uid>/available")]
+fn list_gifts_available(uid: &str, db: DBI) -> JSON<CheckoutResult<Vec<String>>> {
+    let db = &db.0;
+    try_err!(User::find_by_id(db, uid), "该用户不存在");
+    let gifts = Gift::available_for_user(db, uid);
+    JSON(CheckoutResult(Ok(gifts)))
+}
 #[get("/gift/checkout/<uid>/<gift>")]
 fn checkout_gift(uid: &str, gift: &str, db: DBI) -> JSON<CheckoutResult<i32>> {
     let db = &db.0;
@@ -73,5 +80,5 @@ fn uncheck_gift(uid: &str, gift: &str, db: DBI) -> JSON<CheckoutResult<i32>> {
 }
 
 pub fn routes() -> Vec<Route> {
-    routes![list_gifts, checkout_gift, uncheck_gift]
+    routes![list_gifts_checked, list_gifts_available, checkout_gift, uncheck_gift]
 }

@@ -56,7 +56,8 @@ impl TicketCat {
              Self::new("c87b857ad1434da2b241fb9d35f05cc9", "极客先锋票", "1,2,3"),
              Self::new("7797d64ca97748ec8746e4ae980734ab", "极客趣享票", "1"),
              Self::new("08e671f9f40b4020bcf94f4e05eda2b5", "极客体验票", "1"),
-             Self::new("11111111111111111111111111111111", "媒体票",    "1,2,3")];
+             // Self::new("11111111111111111111111111111111", "媒体票",    "1,2,3"),
+             Self::new("b303ec524bca43ffb3582a4d1d2bd660", "媒体票",    "1,2,3")];
         for rec in v.iter() {
             db.insert(rec);
         }

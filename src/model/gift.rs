@@ -5,6 +5,7 @@ pub struct Gift {
     pub id: String,
     pub user_id: String,
     pub gift: String,
+    pub available_at: Option<Timespec>,
     pub checked_at: Option<Timespec>,
 }
 
@@ -15,7 +16,8 @@ impl Gift {
                         "id             VARCHAR PRIMARY KEY, \
                         user_id         VARCHAR NOT NULL, \
                         gift            VARCHAR NOT NULL, \
-                        checked_at     INTEGER").unwrap();
+                        available_at    INTEGER, \
+                        checked_at      INTEGER").unwrap();
         db.create_index("gifts", "user_id").unwrap();
         db.create_index("gifts", "gift").unwrap();
     }
@@ -26,18 +28,20 @@ impl Record for Gift {
         "gifts"
     }
     fn static_fields() -> &'static [&'static str] {
-        static FIELDS: &'static [&'static str] = &["id", "user_id", "gift", "checked_at"];
+        static FIELDS: &'static [&'static str] =
+            &["id", "user_id", "gift", "available_at", "checked_at"];
         FIELDS
     }
     fn values<'a>(&'a self) -> Vec<&'a ToSql> {
-        vec![&self.id, &self.user_id, &self.gift, &self.checked_at]
+        vec![&self.id, &self.user_id, &self.gift, &self.available_at, &self.checked_at]
     }
     fn from_row(row: &sql::Row) -> Self {
         Gift {
             id: row.get(0),
             user_id: row.get(1),
             gift: row.get(2),
-            checked_at: row.get(3),
+            available_at: row.get(3),
+            checked_at: row.get(4),
         }
     }
 }
@@ -49,6 +53,7 @@ impl Gift {
             user_id: uid.into(),
             gift: gift.into(),
             checked_at: None,
+            available_at: None,
         }
     }
 
@@ -81,8 +86,20 @@ impl Gift {
             Some(())
         }
     }
-    pub fn for_user(db: &DB, uid: &str) -> Vec<String> {
-        let gifts = db.search("SELECT * FROM gifts WHERE user_id = ?", &[&uid]);
+    pub fn available_for_user(db: &DB, uid: &str) -> Vec<String> {
+        let gifts =
+            db.search("SELECT * FROM gifts WHERE user_id = ? AND available_at IS NOT NULL AND \
+                       checked_at IS NULL",
+                      &[&uid]);
+        let mut names: Vec<String> = gifts.iter().map(|x: &Gift| x.gift.clone()).collect();
+        names.sort();
+        names.dedup();
+        names
+    }
+
+    pub fn checked_for_user(db: &DB, uid: &str) -> Vec<String> {
+        let gifts = db.search("SELECT * FROM gifts WHERE user_id = ? AND checked_at IS NOT NULL",
+                              &[&uid]);
         let mut names: Vec<String> = gifts.iter().map(|x: &Gift| x.gift.clone()).collect();
         names.sort();
         names.dedup();
