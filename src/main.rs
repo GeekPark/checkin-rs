@@ -24,6 +24,8 @@ extern crate uuid;
 extern crate docopt;
 
 pub use rocket_contrib::JSON;
+use rocket::response::NamedFile;
+use std::path::{PathBuf, Path};
 
 mod api;
 mod admin;
@@ -43,8 +45,17 @@ fn init() {
     TicketCat::seed(&db);
 }
 
+#[get("<file..>", rank=2)]
+fn static_index(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/").join(file)).ok()
+}
+
 fn server() {
-    rocket::ignite().mount("/api", api::routes()).mount("/admin", admin::routes()).launch();
+    rocket::ignite()
+        .mount("/api", api::routes())
+        .mount("/admin", admin::routes())
+        .mount("/", routes![static_index])
+        .launch();
 }
 
 fn main() {
