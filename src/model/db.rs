@@ -76,6 +76,11 @@ impl DB {
         v
     }
 
+    pub fn count(&self, query: &str, args: &[&ToSql]) -> Option<usize> {
+        let conn = self.conn.lock().unwrap();
+        conn.query_row(query, args, |row| row.get::<i32, i32>(0) as usize).ok()
+    }
+
     pub fn search_one<T: Record>(&self, query: &str, args: &[&ToSql]) -> Option<T> {
         let conn = self.conn.lock().unwrap();
         conn.query_row(query, args, |row| T::from_row(&row)).ok()

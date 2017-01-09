@@ -158,6 +158,14 @@ impl User {
             None
         }
     }
+
+    pub fn count(db: &DB) -> Option<usize> {
+        db.count("SELECT COUNT(*) FROM users", &[])
+    }
+    pub fn checked_count(db: &DB) -> Option<usize> {
+        db.count("SELECT COUNT(*) FROM users WHERE checked_at IS NOT NULL",
+                 &[])
+    }
 }
 
 pub fn name_to_pinyin(name: &str) -> String {
