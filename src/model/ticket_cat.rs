@@ -76,11 +76,11 @@ impl TicketCat {
         db.search_one("SELECT * FROM ticket_cats WHERE id = ?", &[&id])
     }
 
-    pub fn guard_today(vec: &Vec<Self>) -> Option<()> {
-        if vec.iter().any(|tc| today::contains_today(&tc.days)) {
-            Some(())
-        } else {
-            None
-        }
-    }
+    // pub fn guard_today(vec: &Vec<Self>) -> Option<()> {
+    //     if vec.iter().any(|tc| today::contains_today(&tc.days)) {
+    //         Some(())
+    //     } else {
+    //         None
+    //     }
+    // }
 }

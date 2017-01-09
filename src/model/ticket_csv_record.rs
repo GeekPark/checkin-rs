@@ -44,7 +44,7 @@ impl TicketCSVRecord {
     }
 
     pub fn find_user(&self, db: &DB) -> Option<User> {
-        User::find_by_phone_and_company(db, &self.phone, &self.company)
+        User::find_by_phone_email_and_company(db, &self.phone, &self.email, &self.company)
     }
 
     pub fn find_ticket_cat(&self, db: &DB) -> Option<TicketCat> {

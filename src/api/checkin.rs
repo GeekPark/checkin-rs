@@ -8,6 +8,7 @@ use model::*;
 
 #[derive(Serialize)]
 struct UserInfo {
+    id: String,
     name: String,
     phone: String,
     company: String,
@@ -62,6 +63,7 @@ impl UserInfo {
             .unwrap_or("".into());
         let tis: Vec<TicketInfo> = ts.into_iter().zip(tcs).map(TicketInfo::from).collect();
         UserInfo {
+            id: user.id.clone(),
             name: user.name.clone(),
             phone: user.phone.clone(),
             company: user.company.clone(),
@@ -101,8 +103,8 @@ fn result_from_user(mut user: User, db: &DB) -> JSON<CheckinResult<UserInfo>> {
     let ts = user.tickets(db);
     let tcs = user.ticket_cats(db);
     try_err!(user.check_in(db), "不可以重复签到");
-    try_err!(TicketCat::guard_today(&tcs),
-             "用户未购可以进今日会场的票");
+    // try_err!(TicketCat::guard_today(&tcs),
+    //         "用户未购可以进今日会场的票");
     let user_info = UserInfo::from(&user, ts, tcs);
     JSON(CheckinResult(Ok(user_info)))
 }

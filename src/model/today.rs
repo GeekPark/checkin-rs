@@ -19,7 +19,7 @@ pub fn set_today(today: Day) {
     *w = today;
 }
 
-pub fn contains_today(days: &str) -> bool {
-    let today = get_today();
-    days.split(",").find(|x| x == &today).is_some()
-}
+// pub fn contains_today(days: &str) -> bool {
+//     let today = get_today();
+//     days.split(",").find(|x| x == &today).is_some()
+// }

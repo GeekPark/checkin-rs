@@ -75,9 +75,13 @@ impl User {
         }
     }
 
-    pub fn find_by_phone_and_company(db: &DB, phone: &str, company: &str) -> Option<Self> {
-        db.search_one("SELECT * FROM users WHERE phone = ? AND company = ?",
-                      &[&phone, &company])
+    pub fn find_by_phone_email_and_company(db: &DB,
+                                           phone: &str,
+                                           email: &str,
+                                           company: &str)
+                                           -> Option<Self> {
+        db.search_one("SELECT * FROM users WHERE phone = ? AND email = ? AND company = ?",
+                      &[&phone, &email, &company])
     }
     pub fn find_by_id(db: &DB, id: &str) -> Option<Self> {
         db.search_one("SELECT * FROM users WHERE id = ?", &[&id])
