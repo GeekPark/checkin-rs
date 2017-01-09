@@ -1,3 +1,5 @@
+extern crate pinyin;
+
 use model::*;
 
 pub struct User {
@@ -63,6 +65,11 @@ impl User {
     #[rustfmt_skip]
     pub fn new(name: &str, phone: &str, company: &str,
                position: &str, email: &str, note: &str) -> Self {
+
+        let mut note_with_pinyin = String::new();
+        note_with_pinyin += note;
+        note_with_pinyin += &name_to_pinyin(name);
+
         User {
             id: Uuid::new_v4().hyphenated().to_string(),
             name: name.into(),
@@ -70,7 +77,7 @@ impl User {
             company: company.into(),
             position: position.into(),
             email: email.into(),
-            note: note.into(),
+            note: note_with_pinyin,
             checked_at: None,
         }
     }
@@ -151,4 +158,16 @@ impl User {
             None
         }
     }
+}
+
+pub fn name_to_pinyin(name: &str) -> String {
+    use self::pinyin;
+    use utils;
+    let mut args = pinyin::Args::new();
+    args.heteronym = true;
+
+    let words = pinyin::pinyin(name, &args);
+    let pinyins = utils::sequence(&words);
+
+    pinyins.iter().map(|x| x.concat()).collect::<Vec<String>>().as_slice().join(" ")
 }

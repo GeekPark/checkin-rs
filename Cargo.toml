@@ -17,3 +17,4 @@ lazy_static = "*"
 uuid = { version = "*", features = ["v4"] }
 time = "*"
 docopt = "*"
+pinyin = "*"
