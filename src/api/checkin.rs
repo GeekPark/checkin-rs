@@ -87,7 +87,7 @@ impl TicketInfo {
     }
 
     fn is_free((t, tc): (&Ticket, &TicketCat)) -> bool {
-        if tc.name == "极客超级票" {
+        if tc.name == "极客超级票" || tc.name == "VIP 票" {
             false
         } else {
             t.price < 11f64
