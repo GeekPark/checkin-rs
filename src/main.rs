@@ -1,7 +1,6 @@
 #![feature(plugin)]
 #![feature(conservative_impl_trait)]
 #![feature(custom_attribute)]
-#![feature(proc_macro)]
 #![plugin(rocket_codegen)]
 // For [rustfmt_skip]
 #![allow(unused_attributes)]

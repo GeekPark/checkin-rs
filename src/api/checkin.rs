@@ -82,7 +82,15 @@ impl TicketInfo {
             name: tc.name.clone(),
             days: tc.days.clone(),
             price: t.price,
-            free: t.price < 11f64,
+            free: Self::is_free((t, tc)),
+        }
+    }
+
+    fn is_free((t, tc): (&Ticket, &TicketCat)) -> bool {
+        if tc.name == "极客超级票" {
+            false
+        } else {
+            t.price < 11f64
         }
     }
 }
