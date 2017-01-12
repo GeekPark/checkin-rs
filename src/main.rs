@@ -44,8 +44,13 @@ fn init() {
     TicketCat::seed(&db);
 }
 
+#[get("/")]
+fn static_index() -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/index.html")).ok()
+}
+
 #[get("<file..>", rank=2)]
-fn static_index(file: PathBuf) -> Option<NamedFile> {
+fn static_files(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("static/").join(file)).ok()
 }
 
@@ -53,7 +58,7 @@ fn server() {
     rocket::ignite()
         .mount("/api", api::routes())
         .mount("/admin", admin::routes())
-        .mount("/", routes![static_index])
+        .mount("/", routes![static_index, static_files])
         .launch();
 }
 
