@@ -16,7 +16,7 @@ impl Ticket {
                         "id             VARCHAR PRIMARY KEY, \
                         ticket_cat_id   VARCHAR NOT NULL, \
                         user_id         VARCHAR NOT NULL, \
-                        qrcode          VARCHAR NOT NULL, \
+                        qrcode          VARCHAR NOT NULL UNIQUE, \
                         price           REAL").unwrap();
         db.create_index("tickets", "ticket_cat_id").unwrap();
         db.create_index("tickets", "user_id").unwrap();

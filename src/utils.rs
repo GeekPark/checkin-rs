@@ -10,6 +10,9 @@ pub fn sequence<T>(xss: &Vec<Vec<T>>) -> Vec<Vec<T>>
     if xss.is_empty() {
         return Vec::new();
     }
+    if xss.len() == 1 {
+        return xss[0].clone().into_iter().map(|x| vec![x]).collect();
+    }
 
     let (xs, xss_) = xss.split_first().unwrap();
     let rest: Vec<Vec<T>> = sequence(&xss_.to_vec());

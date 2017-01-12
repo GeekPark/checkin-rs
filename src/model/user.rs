@@ -65,10 +65,11 @@ impl User {
     #[rustfmt_skip]
     pub fn new(name: &str, phone: &str, company: &str,
                position: &str, email: &str, note: &str) -> Self {
-
         let mut note_with_pinyin = String::new();
-        note_with_pinyin += note;
-        note_with_pinyin += &name_to_pinyin(name);
+        use std::fmt::Write;
+        write!(note_with_pinyin, "{} {}", note, &name_to_pinyin(name)).ok();
+
+        println!("xxx: {} => {}", name, &name_to_pinyin(name));
 
         User {
             id: Uuid::new_v4().hyphenated().to_string(),
